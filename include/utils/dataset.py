@@ -6,17 +6,16 @@ from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQue
 project = 'spock-main'
 dataset_id = 'uniswap_v3_positions'
 
-def add_dataset(**kwargs):
-    _add_dataset = BigQueryCreateEmptyDatasetOperator(
+def add_dataset():
+    return BigQueryCreateEmptyDatasetOperator(
         task_id = 'add_dataset',
         dataset_id = dataset_id,
         gcp_conn_id = gcp_conn_id,
         if_exists = 'skip',
+        trigger_rule='all_done',
     )
-    
-    _add_dataset.execute(context=kwargs)
 
-def add_reference_tables(**kwargs):
+def add_reference_tables():
     query = f"""
         CREATE OR REPLACE VIEW `{dataset_id}.blocks` AS
         SELECT *
@@ -356,11 +355,10 @@ def add_reference_tables(**kwargs):
     ''';
     """
 
-    _add_reference_tables = BigQueryExecuteQueryOperator(
+    return BigQueryExecuteQueryOperator(
         task_id ='add_reference_tables',
         sql = query,
         use_legacy_sql = False,
         gcp_conn_id = 'gcp',
+        trigger_rule='all_done',  
     )
-    
-    _add_reference_tables.execute(context=kwargs)

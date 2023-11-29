@@ -11,13 +11,13 @@ from cosmos.airflow.task_group import DbtTaskGroup
 from cosmos.constants import LoadMode
 from cosmos.config import RenderConfig
 
-
 @dag(
     start_date=datetime(2023, 1, 1),
     schedule=None,
     catchup=False,
     tags=['uniswap_v3_positions'],
 )
+
 def uniswap_v3_positions():
     begin = EmptyOperator(task_id="begin")
     end = EmptyOperator(task_id="end", trigger_rule="none_failed")
@@ -29,19 +29,9 @@ def uniswap_v3_positions():
         trigger_rule='all_done',  
     )
 
-    _add_dataset = PythonOperator(
-        task_id='add_dataset',
-        python_callable=add_dataset,
-        provide_context=True,
-        trigger_rule='all_done',  
-    )
-
-    _add_reference_tables = PythonOperator(
-        task_id='add_reference_tables',
-        python_callable=add_reference_tables,
-        provide_context=True,
-        trigger_rule='all_done', 
-    )
+    _add_dataset = add_dataset()
+    
+    _add_reference_tables = add_reference_tables()
 
     transform = DbtTaskGroup(
         group_id='transform',
