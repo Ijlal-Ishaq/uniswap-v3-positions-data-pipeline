@@ -1,6 +1,7 @@
 WITH decoded_log AS (
   SELECT
-    `spock-main.uniswap_v3_positions.decode_burn_log`(data, topics) AS decoded_data, LOWER(address) as `pool`
+    `spock-main.uniswap_v3_positions.decode_burn_log`(data, topics) AS decoded_data,
+    LOWER(address) AS `pool`
   FROM 
     {{ ref('filtered_logs') }}
   WHERE 

@@ -1,7 +1,7 @@
 WITH decoded_log AS (
   SELECT
     `spock-main.uniswap_v3_positions.decode_swap_log`(data, topics) AS decoded_data,
-    LOWER(address) as pool,
+    LOWER(address) AS pool,
     block_number,
     log_index
   FROM 

@@ -313,6 +313,109 @@ def add_reference_tables():
         ''';
         
         
+        /* Function to decode uniswap v3 position manager's increase liquidity log */
+        CREATE OR REPLACE FUNCTION `{project}.{dataset_id}.decode_increase_liquidity_log`(log_data STRING, topics ARRAY<STRING>) RETURNS STRUCT<tokenId NUMERIC, liquidity FLOAT64> LANGUAGE js
+        OPTIONS (library=["gs://blockchain-etl-bigquery/ethers.js"]) AS '''
+        var abi = [
+            {{
+                "anonymous": false,
+                "inputs": [
+                {{
+                    "indexed": true,
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }},
+                {{
+                    "indexed": false,
+                    "internalType": "uint128",
+                    "name": "liquidity",
+                    "type": "uint128"
+                }},
+                {{
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "amount0",
+                    "type": "uint256"
+                }},
+                {{
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "amount1",
+                    "type": "uint256"
+                }}
+                ],
+                "name": "IncreaseLiquidity",
+                "type": "event"
+            }}
+        ];
+
+        var interface_instance = new ethers.utils.Interface(abi);
+
+        try {{
+            var parsedLog = interface_instance.parseLog({{topics: topics, data: log_data}});
+            return {{
+                tokenId: Number(parsedLog.values.tokenId),
+                liquidity: Number(parsedLog.values.liquidity)
+            }};
+        }} catch (e) {{
+            return null;
+        }}
+        ''';
+        
+        
+        
+        /* Function to decode uniswap v3 position manager's decrease liquidity log */
+        CREATE OR REPLACE FUNCTION `{project}.{dataset_id}.decode_decrease_liquidity_log`(log_data STRING, topics ARRAY<STRING>) RETURNS STRUCT<tokenId NUMERIC, liquidity FLOAT64> LANGUAGE js
+        OPTIONS (library=["gs://blockchain-etl-bigquery/ethers.js"]) AS '''
+        var abi = [
+            {{
+                "anonymous": false,
+                "inputs": [
+                {{
+                    "indexed": true,
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }},
+                {{
+                    "indexed": false,
+                    "internalType": "uint128",
+                    "name": "liquidity",
+                    "type": "uint128"
+                }},
+                {{
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "amount0",
+                    "type": "uint256"
+                }},
+                {{
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "amount1",
+                    "type": "uint256"
+                }}
+                ],
+                "name": "DecreaseLiquidity",
+                "type": "event"
+            }}
+        ];
+
+        var interface_instance = new ethers.utils.Interface(abi);
+
+        try {{
+            var parsedLog = interface_instance.parseLog({{topics: topics, data: log_data}});
+            return {{
+                tokenId: Number(parsedLog.values.tokenId),
+                liquidity: Number(parsedLog.values.liquidity)
+            }};
+        }} catch (e) {{
+            return null;
+        }}
+        ''';
+        
+        
         /* Function to decode uniswap v3 positions */
         CREATE OR REPLACE FUNCTION `spock-main.uniswap_v3_positions.decode_position`(
             chain INT64,
