@@ -26,8 +26,6 @@ transfer_logs AS (
         {{ref('filtered_logs')}}
     WHERE
         topics[0] = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
-    ORDER BY
-        block_number, log_index
 )
 
 
@@ -36,7 +34,7 @@ SELECT
     LOWER(liquidity_mint_logs.address) AS `pool`,
     decoded_data.tickLower AS `tick_lower`,
     decoded_data.tickUpper AS `tick_upper`,
-    CONCAT('0x', SUBSTRING(latest_transfer_logs.topics[2], 3, 40)) AS `owner`
+    CONCAT('0x', RIGHT(latest_transfer_logs.topics[2], 40)) AS `owner`
 FROM 
     nft_mint_logs
 JOIN
@@ -51,7 +49,7 @@ JOIN
     (
         SELECT 
             *,
-            ROW_NUMBER() OVER (PARTITION BY address ORDER BY block_number DESC, log_index DESC) AS rn
+            ROW_NUMBER() OVER (PARTITION BY topics[3] ORDER BY block_number DESC, log_index DESC) AS rn
         FROM transfer_logs
     ) latest_transfer_logs
 ON

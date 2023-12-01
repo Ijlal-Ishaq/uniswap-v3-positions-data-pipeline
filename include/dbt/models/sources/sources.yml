@@ -10,3 +10,7 @@ sources:
       - name: logs
       - name: traces
       - name: tokens
+      - name: filtered_logs
+      - name: increase_liquidity_logs
+      - name: decrease_liquidity_logs
+      - name: positions_calculation_data
